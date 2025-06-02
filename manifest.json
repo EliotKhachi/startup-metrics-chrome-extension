@@ -1,10 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Hello World New Tab",
-  "description": "A simple extension that shows Hello World on new tabs",
+  "name": "Startup Metrics Dashboard",
+  "description": "View your startup metrics from Google Sheets on every new tab",
   "version": "1.0",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
-  "permissions": []
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://sheets.googleapis.com/*"
+  ]
 } 
