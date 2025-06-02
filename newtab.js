@@ -8,13 +8,16 @@ class StartupMetrics {
 
     async init() {
         await this.loadConfig();
-        this.setupEventListeners();
         this.updateTime();
         setInterval(() => this.updateTime(), 1000);
         
         // Load data if configuration exists
         if (this.sheetId && this.apiKey) {
             this.loadMetricsData();
+            // Auto-refresh every 5 minutes
+            setInterval(() => this.loadMetricsData(), 5 * 60 * 1000);
+        } else {
+            this.showSetupHint();
         }
     }
 
@@ -35,31 +38,8 @@ class StartupMetrics {
         
         document.getElementById('currentTime').innerHTML = `
             <div>${timeString}</div>
-            <div style="font-size: 1rem; margin-top: 5px; opacity: 0.8;">${dateString}</div>
+            <div style="font-size: 1.2rem; margin-top: 5px; opacity: 0.7;">${dateString}</div>
         `;
-    }
-
-    // Configuration management
-    async saveConfig() {
-        const sheetId = document.getElementById('sheetId').value.trim();
-        const apiKey = document.getElementById('apiKey').value.trim();
-        
-        if (!sheetId || !apiKey) {
-            this.showStatus('Please enter both Sheet ID and API Key', 'error');
-            return;
-        }
-        
-        this.sheetId = sheetId;
-        this.apiKey = apiKey;
-        
-        // Save to Chrome storage
-        await chrome.storage.local.set({
-            sheetId: this.sheetId,
-            apiKey: this.apiKey
-        });
-        
-        this.showStatus('Configuration saved! Loading data...', 'success');
-        this.loadMetricsData();
     }
 
     async loadConfig() {
@@ -68,8 +48,6 @@ class StartupMetrics {
             if (result.sheetId && result.apiKey) {
                 this.sheetId = result.sheetId;
                 this.apiKey = result.apiKey;
-                document.getElementById('sheetId').value = this.sheetId;
-                document.getElementById('apiKey').value = this.apiKey;
             }
         } catch (error) {
             console.error('Error loading config:', error);
@@ -79,12 +57,12 @@ class StartupMetrics {
     // Google Sheets API integration
     async loadMetricsData() {
         if (!this.sheetId || !this.apiKey) {
-            this.showStatus('Please configure your Sheet ID and API Key first', 'error');
+            this.showStatus('Configuration missing - see README for setup', 'error');
             return;
         }
 
         try {
-            this.showStatus('Loading metrics data...', 'loading');
+            this.showStatus('Loading...', 'loading');
             this.setLoadingState(true);
 
             // Construct the API URL to fetch cells B1, B2, B3
@@ -94,7 +72,7 @@ class StartupMetrics {
             const response = await fetch(url);
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`API Error ${response.status} - Check your Sheet ID and API key`);
             }
             
             const data = await response.json();
@@ -102,42 +80,38 @@ class StartupMetrics {
             if (data.values && data.values.length >= 3) {
                 const [revenue, burn, runway] = data.values.flat();
                 this.updateMetricsDisplay(revenue, burn, runway);
-                this.showStatus('✅ Data loaded successfully!', 'success');
-                
-                // Hide status after 3 seconds
-                setTimeout(() => {
-                    this.hideStatus();
-                }, 3000);
+                this.hideStatus();
+                this.hideSetupHint();
             } else {
-                throw new Error('Sheet does not contain data in cells B1, B2, B3');
+                throw new Error('No data found in cells B1, B2, B3');
             }
         } catch (error) {
             console.error('Error loading metrics:', error);
-            this.showStatus(`❌ Error: ${error.message}`, 'error');
+            this.showStatus(`Error: ${error.message}`, 'error');
         } finally {
             this.setLoadingState(false);
         }
     }
 
-    // Update the metrics display
+    // Update the metrics display with new formatting
     updateMetricsDisplay(revenue, burn, runway) {
-        // Format currency values
+        // Format currency values as ": $number/mo"
         const formatCurrency = (value) => {
             const num = parseFloat(value);
-            if (isNaN(num)) return value;
-            return num.toLocaleString('en-US', {
+            if (isNaN(num)) return `: ${value}`;
+            return `: ${num.toLocaleString('en-US', {
                 style: 'currency',
                 currency: 'USD',
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
-            });
+            })}/mo`;
         };
 
-        // Format runway (assuming it's in months)
+        // Format runway as ": X.X months"
         const formatRunway = (value) => {
             const num = parseFloat(value);
-            if (isNaN(num)) return value;
-            return `${num.toFixed(1)}`;
+            if (isNaN(num)) return `: ${value}`;
+            return `: ${num.toFixed(1)} months`;
         };
 
         document.getElementById('revenue').textContent = formatCurrency(revenue);
@@ -147,11 +121,11 @@ class StartupMetrics {
 
     // UI state management
     setLoadingState(isLoading) {
-        const metricsGrid = document.getElementById('metricsGrid');
+        const body = document.body;
         if (isLoading) {
-            metricsGrid.classList.add('loading');
+            body.classList.add('loading');
         } else {
-            metricsGrid.classList.remove('loading');
+            body.classList.remove('loading');
         }
     }
 
@@ -167,24 +141,15 @@ class StartupMetrics {
         statusElement.style.display = 'none';
     }
 
-    // Event listeners
-    setupEventListeners() {
-        document.getElementById('saveConfig').addEventListener('click', () => {
-            this.saveConfig();
-        });
+    showSetupHint() {
+        const hintElement = document.getElementById('setupHint');
+        hintElement.textContent = 'Configure Sheet ID and API Key in extension code - see README';
+        hintElement.style.opacity = '0.8';
+    }
 
-        document.getElementById('refreshData').addEventListener('click', () => {
-            this.loadMetricsData();
-        });
-
-        // Allow Enter key to save configuration
-        ['sheetId', 'apiKey'].forEach(id => {
-            document.getElementById(id).addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.saveConfig();
-                }
-            });
-        });
+    hideSetupHint() {
+        const hintElement = document.getElementById('setupHint');
+        hintElement.style.opacity = '0.3';
     }
 }
 

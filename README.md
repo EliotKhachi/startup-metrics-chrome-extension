@@ -1,17 +1,16 @@
 # Startup Metrics Dashboard Chrome Extension
 
-A powerful Chrome extension that displays your startup's key metrics (Monthly Revenue, Monthly Burn, and Runway) from Google Sheets directly on every new tab.
+A sleek, minimalist Chrome extension that displays your startup's key metrics (Revenue, Burn, and Runway) from Google Sheets on every new tab with a clean black interface.
 
 ## Features
 
 - 📊 **Real-time Startup Metrics** from Google Sheets
-  - Monthly Revenue (cell B1)
-  - Monthly Burn (cell B2) 
-  - Runway in months (cell B3)
+  - Revenue (cell B1) - displayed as ": $X/mo"
+  - Burn (cell B2) - displayed as ": $X/mo" 
+  - Runway (cell B3) - displayed as ": X.X months"
 - ⏰ **Live Clock** with current time and date
-- 🎨 **Beautiful Dashboard** with glassmorphism design
-- 🔒 **Secure Configuration** stored locally in your browser
-- 🔄 **Auto-refresh** and manual refresh capabilities
+- 🖤 **Minimalist Black Design** with large, white text
+- 🔄 **Auto-refresh** every 5 minutes
 - ✨ **Smooth Animations** and modern UI
 
 ## Prerequisites
@@ -20,46 +19,73 @@ A powerful Chrome extension that displays your startup's key metrics (Monthly Re
 2. **Google Cloud Console API Key** with Sheets API enabled
 3. **Chrome Browser** for installation
 
-## Setup Instructions
+## Quick Setup Instructions
 
-### Step 1: Prepare Your Google Sheet
+### Step 1: Get Google Sheets API Key
 
-1. Create a Google Sheet with your startup metrics:
-   - **Cell B1**: Monthly Revenue (e.g., 50000)
-   - **Cell B2**: Monthly Burn (e.g., 30000)
-   - **Cell B3**: Runway in months (e.g., 12.5)
+1. **Go to [Google Cloud Console](https://console.developers.google.com/)**
+2. **Create a new project** or select existing one
+3. **Enable the Google Sheets API:**
+   - Click **+ Enable APIs and Services**
+   - Search for "Google Sheets API" and select it
+   - Click **Enable**
+4. **Create API Key:**
+   - Go to **Credentials** in the left sidebar
+   - Click **+ Create Credentials** → **API Key**
+   - Copy the generated key
+   - Click **Restrict Key** → Choose **Google Sheets API** → **Save**
+
+### Step 2: Prepare Your Google Sheet
+
+1. **Create a Google Sheet** with your startup metrics:
+   - **Cell B1**: Revenue amount (e.g., 50000)
+   - **Cell B2**: Burn amount (e.g., 30000)
+   - **Cell B3**: Runway in months (e.g., 16.7)
 
 2. **Publish your sheet**:
    - Go to `File` → `Share` → `Publish to web`
-   - Click `Publish` (this makes it publicly readable)
+   - Click `Publish` (makes it publicly readable)
 
 3. **Get the Sheet ID**:
    - Copy the ID from your sheet URL: `https://docs.google.com/spreadsheets/d/[SHEET_ID]/edit`
 
-### Step 2: Get Google Sheets API Key
+### Step 3: Configure the Extension
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing one
-3. Enable the **Google Sheets API**:
-   - Go to `APIs & Services` → `Library`
-   - Search for "Google Sheets API" and enable it
-4. Create an API Key:
-   - Go to `APIs & Services` → `Credentials`
-   - Click `Create Credentials` → `API Key`
-   - Copy the generated API key
+1. **Edit the config file**:
+   - Open `config.js` in a text editor
+   - Replace `YOUR_SHEET_ID_HERE` with your actual Sheet ID
+   - Replace `YOUR_API_KEY_HERE` with your actual API key
+   - Save the file
 
-### Step 3: Install the Extension
-
-1. **Load in Chrome**:
+2. **Install in Chrome**:
    - Open `chrome://extensions/`
    - Enable `Developer mode`
    - Click `Load unpacked`
    - Select this extension folder
 
-2. **Configure the Extension**:
-   - Open a new tab
-   - Enter your **Sheet ID** and **API Key** in the configuration panel
-   - Click **Save & Load Data**
+## Example Configuration
+
+Your `config.js` should look like this:
+
+```javascript
+const CONFIG = {
+    SHEET_ID: '1ABC123def456GHI789jkl012MNO345pqr678STU',
+    API_KEY: 'AIzaSyABC123def456GHI789jkl012MNO345pqr678'
+};
+```
+
+Your Google Sheet should contain:
+
+| A | B |
+|---|---|
+| Label | 75000 |
+| Label | 45000 |
+| Label | 18.2 |
+
+The extension will display:
+- **Revenue**: : $75,000/mo
+- **Burn**: : $45,000/mo  
+- **Runway**: : 18.2 months
 
 ## Files Structure
 
@@ -68,60 +94,41 @@ startup-metrics-chrome-extension/
 ├── manifest.json      # Extension configuration
 ├── newtab.html       # Dashboard interface
 ├── newtab.js         # Core functionality & Google Sheets integration
+├── config.js         # Your configuration (Sheet ID & API key)
 └── README.md         # This file
 ```
 
 ## Usage
 
 Once configured, every new tab will show:
-- 💰 **Monthly Revenue** in green
-- 🔥 **Monthly Burn** in red  
-- 🛣️ **Runway** in yellow (months remaining)
+- 💚 **Revenue** in bright green
+- 🔴 **Burn** in red  
+- 🟡 **Runway** in amber
 - 🕐 **Current time** and date
 
-### Data Format Examples
-
-Your Google Sheet should contain:
-
-| A | B |
-|---|---|
-| Revenue | 75000 |
-| Burn | 45000 |
-| Runway | 18.2 |
-
-The extension will automatically format:
-- Revenue/Burn as currency: `$75,000`
-- Runway as decimal: `18.2` months
+Data refreshes automatically every 5 minutes.
 
 ## Troubleshooting
 
 ### Common Issues:
 
-1. **"HTTP error! status: 403"**
+1. **"API Error 403"**
    - Check that your Google Sheet is published to web
    - Verify your API key is correct and has Sheets API enabled
 
-2. **"Sheet does not contain data"**
-   - Ensure cells B1, B2, B3 contain your metrics
+2. **"No data found in cells B1, B2, B3"**
+   - Ensure cells B1, B2, B3 contain your metrics (numbers only)
    - Check that the data is in the first sheet (tab)
 
-3. **"Please configure your Sheet ID and API Key first"**
-   - Enter both values in the configuration panel
-   - Click "Save & Load Data"
+3. **"Configuration missing"**
+   - Edit `config.js` with your actual Sheet ID and API key
+   - Reload the extension in `chrome://extensions/`
 
 ### Security Notes
 
 - Your API key and Sheet ID are stored locally in your browser only
 - The Google Sheet must be public for the API to access it
 - Consider using a dedicated sheet with only the metrics you want to display
-
-## Customization
-
-You can modify:
-- **Metrics**: Change which cells are fetched in `newtab.js`
-- **Styling**: Update CSS in `newtab.html`
-- **Refresh Rate**: Add auto-refresh functionality
-- **Additional Data**: Expand to read more cells/sheets
 
 ## Development
 
@@ -152,4 +159,4 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-Built with the [Google Sheets API v4](https://developers.google.com/sheets/api/guides/concepts) for reliable data access. 
+Built with the [Google Sheets API v4](https://developers.google.com/workspace/sheets/api/guides/concepts) for reliable data access. 
