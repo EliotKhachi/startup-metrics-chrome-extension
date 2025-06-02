@@ -37,10 +37,13 @@ class StartupMetrics {
             day: 'numeric'
         });
         
-        document.getElementById('currentTime').innerHTML = `
-            <div>${timeString}</div>
-            <div style="font-size: 1.2rem; margin-top: 5px; opacity: 0.7;">${dateString}</div>
-        `;
+        const timeElement = document.getElementById('currentTime');
+        if (timeElement) {
+            timeElement.innerHTML = `
+                <div>${timeString}</div>
+                <div style="font-size: 1.2rem; margin-top: 5px; opacity: 0.7;">${dateString}</div>
+            `;
+        }
     }
 
     async loadConfig() {
@@ -58,8 +61,6 @@ class StartupMetrics {
     // OAuth 2.0 Authentication
     async authenticateAndLoadData() {
         try {
-            this.showStatus('Authenticating...', 'loading');
-            
             // Get OAuth token using Chrome Identity API
             const token = await new Promise((resolve, reject) => {
                 chrome.identity.getAuthToken(
@@ -95,7 +96,6 @@ class StartupMetrics {
         }
 
         try {
-            this.showStatus('Loading...', 'loading');
             this.setLoadingState(true);
 
             // Construct the API URL to fetch cells B1, B2, B3 with OAuth token
@@ -133,6 +133,7 @@ class StartupMetrics {
             }
         } catch (error) {
             console.error('Error loading metrics:', error);
+            this.setLoadingState(false);
             this.showStatus(`Error: ${error.message}`, 'error');
         } finally {
             this.setLoadingState(false);
@@ -171,63 +172,59 @@ class StartupMetrics {
         }
     }
 
-    // Update the metrics display with new formatting
+    // Update the metrics display with raw values from Google Sheets
     updateMetricsDisplay(revenue, burn, runway) {
-        // Format currency values as ": $number/mo"
-        const formatCurrency = (value) => {
-            const num = parseFloat(value);
-            if (isNaN(num)) return `: ${value}`;
-            return `: ${num.toLocaleString('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            })}/mo`;
-        };
-
-        // Format runway as ": X.X months"
-        const formatRunway = (value) => {
-            const num = parseFloat(value);
-            if (isNaN(num)) return `: ${value}`;
-            return `: ${num.toFixed(1)} months`;
-        };
-
-        document.getElementById('revenue').textContent = formatCurrency(revenue);
-        document.getElementById('burn').textContent = formatCurrency(burn);
-        document.getElementById('runway').textContent = formatRunway(runway);
+        const revenueEl = document.getElementById('revenue');
+        const burnEl = document.getElementById('burn');
+        const runwayEl = document.getElementById('runway');
+        
+        if (revenueEl) revenueEl.textContent = revenue;
+        if (burnEl) burnEl.textContent = burn;
+        if (runwayEl) runwayEl.textContent = runway;
     }
 
     // UI state management
     setLoadingState(isLoading) {
         const body = document.body;
-        if (isLoading) {
-            body.classList.add('loading');
-        } else {
-            body.classList.remove('loading');
+        if (body) {
+            if (isLoading) {
+                body.classList.add('loading');
+            } else {
+                body.classList.remove('loading');
+            }
         }
     }
 
     showStatus(message, type) {
         const statusElement = document.getElementById('dataStatus');
-        statusElement.textContent = message;
-        statusElement.className = `status ${type}`;
-        statusElement.style.display = 'block';
+        if (statusElement) {
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+            statusElement.style.display = 'block';
+        }
     }
 
     hideStatus() {
         const statusElement = document.getElementById('dataStatus');
-        statusElement.style.display = 'none';
+        if (statusElement) {
+            statusElement.style.display = 'none';
+        }
     }
 
     showSetupHint() {
         const hintElement = document.getElementById('setupHint');
-        hintElement.textContent = 'Configure OAuth Client ID and Sheet ID in extension code - see README';
-        hintElement.style.opacity = '0.8';
+        if (hintElement) {
+            hintElement.textContent = 'Configure OAuth Client ID and Sheet ID in extension code - see README';
+            hintElement.style.display = 'block';
+            hintElement.style.opacity = '0.8';
+        }
     }
 
     hideSetupHint() {
         const hintElement = document.getElementById('setupHint');
-        hintElement.style.opacity = '0.3';
+        if (hintElement) {
+            hintElement.style.display = 'none';
+        }
     }
 }
 
@@ -251,18 +248,22 @@ function addGreeting() {
     
     // Add greeting after a short delay for better animation effect
     setTimeout(() => {
-        const container = document.querySelector('.container');
-        const greetingElement = document.createElement('div');
-        greetingElement.style.cssText = `
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            opacity: 0;
-            animation: fadeInUp 1s ease-out 0.9s both;
-        `;
-        greetingElement.textContent = greeting;
-        container.insertBefore(greetingElement, container.firstChild);
+        const header = document.querySelector('.header');
+        if (header) {
+            const greetingElement = document.createElement('div');
+            greetingElement.style.cssText = `
+                font-size: 1.1rem;
+                margin-bottom: 20px;
+                opacity: 0;
+                animation: fadeInUp 1s ease-out 0.9s both;
+            `;
+            greetingElement.textContent = greeting;
+            header.insertBefore(greetingElement, header.firstChild);
+        }
     }, 500);
 }
 
 // Add greeting when page loads
-addGreeting(); 
+document.addEventListener('DOMContentLoaded', () => {
+    addGreeting();
+}); 

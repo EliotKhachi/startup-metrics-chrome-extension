@@ -28,7 +28,6 @@
             margin: 0;
             font-weight: 300;
             letter-spacing: 2px;
-            animation: fadeInUp 1s ease-out;
         }
         
         .time {
@@ -36,29 +35,33 @@
             margin-top: 20px;
             font-weight: 200;
             opacity: 0.8;
-            animation: fadeInUp 1s ease-out 0.3s both;
         }
         
         .metrics-container {
-            max-width: 1000px;
+            display: flex;
+            justify-content: center;
             width: 100%;
         }
         
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 40px;
-            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         
         .metric-card {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            padding: 40px;
+            padding: 40px 30px;
             text-align: center;
             transition: all 0.3s ease;
-            animation: fadeInUp 1s ease-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: fit-content;
         }
         
         .metric-card:hover {
@@ -71,8 +74,8 @@
         .metric-card:nth-child(3) { animation-delay: 0.8s; }
         
         .metric-label {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
+            font-size: 1.6rem;
+            margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 3px;
             font-weight: 200;
@@ -80,7 +83,7 @@
         }
         
         .metric-value {
-            font-size: 3.5rem;
+            font-size: 3rem;
             font-weight: 100;
             margin: 0;
             letter-spacing: 1px;
@@ -115,27 +118,6 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.8);
         }
-        
-        .loading .metrics-grid {
-            opacity: 0.6;
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 0.8; }
-        }
 
         .setup-hint {
             text-align: center;
@@ -168,10 +150,7 @@
             </div>
         </div>
         <div class="status" id="dataStatus" style="display: none;"></div>
-        
-        <div class="setup-hint" id="setupHint">
-            See README for configuration instructions
-        </div>
+        <div class="setup-hint" id="setupHint" style="display: none;"></div>
     </div>
     
     <script src="config.js"></script>
