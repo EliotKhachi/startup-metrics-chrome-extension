@@ -62,7 +62,6 @@ class StartupMetrics {
             
             // Get OAuth token using Chrome Identity API
             const token = await new Promise((resolve, reject) => {
-                console.log('Attempting OAuth authentication...');
                 chrome.identity.getAuthToken(
                     { 
                         interactive: true,
@@ -73,7 +72,6 @@ class StartupMetrics {
                             console.error('Chrome identity error:', chrome.runtime.lastError);
                             reject(chrome.runtime.lastError);
                         } else {
-                            console.log('OAuth token received successfully');
                             resolve(token);
                         }
                     }
@@ -112,6 +110,9 @@ class StartupMetrics {
             });
             
             if (!response.ok) {
+                const errorBody = await response.text();
+                console.error('API Error response body:', errorBody);
+                
                 if (response.status === 401) {
                     // Token expired, try to get a new one
                     await this.refreshToken();
