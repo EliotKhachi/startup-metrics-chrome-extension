@@ -62,6 +62,7 @@ class StartupMetrics {
             
             // Get OAuth token using Chrome Identity API
             const token = await new Promise((resolve, reject) => {
+                console.log('Attempting OAuth authentication...');
                 chrome.identity.getAuthToken(
                     { 
                         interactive: true,
@@ -69,8 +70,10 @@ class StartupMetrics {
                     },
                     (token) => {
                         if (chrome.runtime.lastError) {
+                            console.error('Chrome identity error:', chrome.runtime.lastError);
                             reject(chrome.runtime.lastError);
                         } else {
+                            console.log('OAuth token received successfully');
                             resolve(token);
                         }
                     }
@@ -82,7 +85,7 @@ class StartupMetrics {
             
         } catch (error) {
             console.error('Authentication failed:', error);
-            this.showStatus('Authentication failed - please check configuration', 'error');
+            this.showStatus(`Authentication failed: ${error.message || error}`, 'error');
         }
     }
 

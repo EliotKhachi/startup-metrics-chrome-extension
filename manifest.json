@@ -14,10 +14,9 @@
     "https://sheets.googleapis.com/*"
   ],
   "oauth2": {
-    "client_id": "YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com",
+    "client_id": "304726963595-ur5bvskdm1qqv1vsth8g1han9bafvl6i.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/spreadsheets.readonly"
     ]
-  },
-  "key": "YOUR_EXTENSION_KEY_HERE"
+  }
 } 
