@@ -44,9 +44,9 @@ cd startup-metrics-chrome-extension
 
 1. **Create a Google Sheet** with your metrics in cells B1, B2, B3:
    ```
-   B1: Revenue (e.g., 50000)
-   B2: Burn (e.g., 30000)  
-   B3: Runway in months (e.g., 16.7)
+   B1: Revenue (e.g., $50,000/mo)
+   B2: Burn (e.g., $30,000/mo)  
+   B3: Runway in months (e.g., 16.7 months)
    ```
 2. **Get Sheet ID** from the URL: `https://docs.google.com/spreadsheets/d/[SHEET_ID]/edit`
 3. **Keep it private** - don't publish to web, just ensure you have access
