@@ -7,7 +7,7 @@ const CONFIG = {
     
     // Your OAuth 2.0 Client ID (from Google Cloud Console)
     // Note: This should also be added to manifest.json
-    OAUTH_CLIENT_ID: 'YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com'
+    OAUTH_CLIENT_ID: '304726963595-td1l8qa8vsfmn29pfq4uqkv06hk1lght.apps.googleusercontent.com'
 };
 
 // Save configuration to Chrome storage when the file loads
