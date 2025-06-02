@@ -2,6 +2,9 @@
 
 A minimalist Chrome extension that displays your startup's key metrics (Revenue, Burn, Runway) from **private** Google Sheets on every new tab.
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-green.svg)
+
 ## Features
 
 - 📊 **Real-time metrics** from private Google Sheets (Revenue, Burn, Runway)
@@ -15,7 +18,7 @@ A minimalist Chrome extension that displays your startup's key metrics (Revenue,
 ### 1. Clone and Install Extension
 
 ```bash
-git clone https://github.com/yourusername/startup-metrics-chrome-extension.git
+git clone https://github.com/EliotKhachi/startup-metrics-chrome-extension.git
 cd startup-metrics-chrome-extension
 ```
 
@@ -128,6 +131,14 @@ startup-metrics-chrome-extension/
 ## Browser Support
 
 Works with Chrome, Edge, Brave, and other Chromium-based browsers.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
