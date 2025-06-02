@@ -3,16 +3,17 @@
 
 const CONFIG = {
     // Your Google Sheet ID (from the URL: docs.google.com/spreadsheets/d/[SHEET_ID]/edit)
-    SHEET_ID: 'YOUR_SHEET_ID_HERE',
+    SHEET_ID: '17qKlzuprqhmsPrNqdBEUTpcXH3NgvhJG7QC460UYODM',
     
-    // Your Google Sheets API key (from Google Cloud Console)
-    API_KEY: 'YOUR_API_KEY_HERE'
+    // Your OAuth 2.0 Client ID (from Google Cloud Console)
+    // Note: This should also be added to manifest.json
+    OAUTH_CLIENT_ID: 'YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com'
 };
 
 // Save configuration to Chrome storage when the file loads
 if (typeof chrome !== 'undefined' && chrome.storage) {
     chrome.storage.local.set({
         sheetId: CONFIG.SHEET_ID,
-        apiKey: CONFIG.API_KEY
+        oauthClientId: CONFIG.OAUTH_CLIENT_ID
     });
 } 

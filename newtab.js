@@ -2,7 +2,8 @@
 class StartupMetrics {
     constructor() {
         this.sheetId = '';
-        this.apiKey = '';
+        this.oauthClientId = '';
+        this.accessToken = null;
         this.init();
     }
 
@@ -12,8 +13,8 @@ class StartupMetrics {
         setInterval(() => this.updateTime(), 1000);
         
         // Load data if configuration exists
-        if (this.sheetId && this.apiKey) {
-            this.loadMetricsData();
+        if (this.sheetId && this.oauthClientId) {
+            await this.authenticateAndLoadData();
             // Auto-refresh every 5 minutes
             setInterval(() => this.loadMetricsData(), 5 * 60 * 1000);
         } else {
@@ -44,20 +45,51 @@ class StartupMetrics {
 
     async loadConfig() {
         try {
-            const result = await chrome.storage.local.get(['sheetId', 'apiKey']);
-            if (result.sheetId && result.apiKey) {
+            const result = await chrome.storage.local.get(['sheetId', 'oauthClientId']);
+            if (result.sheetId && result.oauthClientId) {
                 this.sheetId = result.sheetId;
-                this.apiKey = result.apiKey;
+                this.oauthClientId = result.oauthClientId;
             }
         } catch (error) {
             console.error('Error loading config:', error);
         }
     }
 
-    // Google Sheets API integration
+    // OAuth 2.0 Authentication
+    async authenticateAndLoadData() {
+        try {
+            this.showStatus('Authenticating...', 'loading');
+            
+            // Get OAuth token using Chrome Identity API
+            const token = await new Promise((resolve, reject) => {
+                chrome.identity.getAuthToken(
+                    { 
+                        interactive: true,
+                        scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
+                    },
+                    (token) => {
+                        if (chrome.runtime.lastError) {
+                            reject(chrome.runtime.lastError);
+                        } else {
+                            resolve(token);
+                        }
+                    }
+                );
+            });
+
+            this.accessToken = token;
+            await this.loadMetricsData();
+            
+        } catch (error) {
+            console.error('Authentication failed:', error);
+            this.showStatus('Authentication failed - please check configuration', 'error');
+        }
+    }
+
+    // Google Sheets API integration with OAuth
     async loadMetricsData() {
-        if (!this.sheetId || !this.apiKey) {
-            this.showStatus('Configuration missing - see README for setup', 'error');
+        if (!this.sheetId || !this.accessToken) {
+            this.showStatus('Configuration missing or not authenticated', 'error');
             return;
         }
 
@@ -65,14 +97,24 @@ class StartupMetrics {
             this.showStatus('Loading...', 'loading');
             this.setLoadingState(true);
 
-            // Construct the API URL to fetch cells B1, B2, B3
+            // Construct the API URL to fetch cells B1, B2, B3 with OAuth token
             const range = 'B1:B3';
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.sheetId}/values/${range}?key=${this.apiKey}`;
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${this.sheetId}/values/${range}`;
             
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             
             if (!response.ok) {
-                throw new Error(`API Error ${response.status} - Check your Sheet ID and API key`);
+                if (response.status === 401) {
+                    // Token expired, try to get a new one
+                    await this.refreshToken();
+                    return this.loadMetricsData();
+                }
+                throw new Error(`API Error ${response.status} - Check your Sheet ID and permissions`);
             }
             
             const data = await response.json();
@@ -90,6 +132,38 @@ class StartupMetrics {
             this.showStatus(`Error: ${error.message}`, 'error');
         } finally {
             this.setLoadingState(false);
+        }
+    }
+
+    // Refresh OAuth token
+    async refreshToken() {
+        try {
+            // Remove cached token
+            if (this.accessToken) {
+                chrome.identity.removeCachedAuthToken({ token: this.accessToken });
+            }
+            
+            // Get new token
+            const token = await new Promise((resolve, reject) => {
+                chrome.identity.getAuthToken(
+                    { 
+                        interactive: false,
+                        scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
+                    },
+                    (token) => {
+                        if (chrome.runtime.lastError) {
+                            reject(chrome.runtime.lastError);
+                        } else {
+                            resolve(token);
+                        }
+                    }
+                );
+            });
+            
+            this.accessToken = token;
+        } catch (error) {
+            console.error('Token refresh failed:', error);
+            throw new Error('Authentication expired - please refresh the page');
         }
     }
 
@@ -143,7 +217,7 @@ class StartupMetrics {
 
     showSetupHint() {
         const hintElement = document.getElementById('setupHint');
-        hintElement.textContent = 'Configure Sheet ID and API Key in extension code - see README';
+        hintElement.textContent = 'Configure OAuth Client ID and Sheet ID in extension code - see README';
         hintElement.style.opacity = '0.8';
     }
 

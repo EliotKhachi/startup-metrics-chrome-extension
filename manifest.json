@@ -1,15 +1,23 @@
 {
   "manifest_version": 3,
   "name": "Startup Metrics Dashboard",
-  "description": "View your startup metrics from Google Sheets on every new tab",
+  "description": "View your startup metrics from private Google Sheets on every new tab",
   "version": "1.0",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
   "permissions": [
-    "storage"
+    "storage",
+    "identity"
   ],
   "host_permissions": [
     "https://sheets.googleapis.com/*"
-  ]
+  ],
+  "oauth2": {
+    "client_id": "YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/spreadsheets.readonly"
+    ]
+  },
+  "key": "YOUR_EXTENSION_KEY_HERE"
 } 
